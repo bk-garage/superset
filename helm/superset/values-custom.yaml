@@ -1,0 +1,34 @@
+# See https://superset.apache.org/docs/installation/kubernetes/
+
+# -- User ID directive. This user must have enough permissions to run the bootstrap script.
+# Running containers as root is not recommended in production. Change this to another UID - e.g. 1000 to be more secure
+# runAsUser: 1000
+
+# serviceAccount:
+#     create: true
+
+# init:
+#     # Load the Examples data and dashboards.
+#     loadExamples: true
+
+image:
+    repository: "apache/superset"
+
+postgresql:
+    image:
+        tag: "latest"
+
+bootstrapScript: |
+    #!/bin/bash
+    #BK: The following line is necessary, otherwise psycopg2 is not found.
+    apt-get update && apt-get install -y build-essential
+    pip install psycopg2==2.9.10 &&\
+    if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
+
+# Install the drivers for BigQuery and Elasticsearch, allowing us to connect to these data sources within our Superset setup.
+# bootstrapScript: |
+#   #!/bin/bash
+#   pip install psycopg2==2.9.6 \
+#     sqlalchemy-bigquery==1.6.1 \
+#     elasticsearch-dbapi==0.2.5 &&\
+#   if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
