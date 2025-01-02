@@ -35,6 +35,7 @@ Right-click on the RD icon -> Kubernetes Contexts -> rancher-desktop
 
 Deployment succeeded with the two values files:
 ```zsh
+cd helm/superset
 helm install -f values-custom.yaml -f values-secret.yaml superset superset/superset -n superset --create-namespace
 helm uninstall superset -n superset
 ```
