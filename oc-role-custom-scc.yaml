@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    name: custom-scc
+    namespace: superset
+rules:
+    - apiGroups:
+      - security.openshift.io
+      resourceNames:
+      - anyuid
+      - privileged
+      resources:
+      - securitycontextconstraints
+      verbs:
+      - use
