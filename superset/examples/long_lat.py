@@ -15,10 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 import datetime
+import logging
 import random
 
 import geohash
-import pandas as pd
 from sqlalchemy import DateTime, Float, inspect, String
 
 import superset.utils.database as database_utils
@@ -28,12 +28,14 @@ from superset.sql_parse import Table
 from superset.utils.core import DatasourceType
 
 from .helpers import (
-    get_example_url,
     get_slice_json,
     get_table_connector_registry,
     merge_slice,
     misc_dash_slices,
+    read_example_data,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None:
@@ -45,8 +47,9 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
         table_exists = database.has_table(Table(tbl_name, schema))
 
         if not only_metadata and (not table_exists or force):
-            url = get_example_url("san_francisco.csv.gz")
-            pdf = pd.read_csv(url, encoding="utf-8", compression="gzip")
+            pdf = read_example_data(
+                "san_francisco.csv.gz", encoding="utf-8", compression="gzip"
+            )
             start = datetime.datetime.now().replace(
                 hour=0, minute=0, second=0, microsecond=0
             )
@@ -85,10 +88,10 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
                 },
                 index=False,
             )
-        print("Done loading table!")
-        print("-" * 80)
+        logger.debug("Done loading table!")
+        logger.debug("-" * 80)
 
-    print("Creating table reference")
+    logger.debug("Creating table reference")
     table = get_table_connector_registry()
     obj = db.session.query(table).filter_by(table_name=tbl_name).first()
     if not obj:
@@ -112,7 +115,7 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
         "row_limit": 500000,
     }
 
-    print("Creating a slice")
+    logger.debug("Creating a slice")
     slc = Slice(
         slice_name="Mapbox Long/Lat",
         viz_type="mapbox",

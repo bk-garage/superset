@@ -557,7 +557,7 @@ def test_get_samples(test_client, login_as_admin, virtual_dataset):
 
     sql = (
         f"select * from ({virtual_dataset.sql}) as tbl "  # noqa: S608
-        f'limit {app.config["SAMPLES_ROW_LIMIT"]}'
+        f"limit {app.config['SAMPLES_ROW_LIMIT']}"
     )
     eager_samples = virtual_dataset.database.get_df(sql)
 
@@ -580,10 +580,7 @@ def test_get_samples_with_incorrect_cc(test_client, login_as_admin, virtual_data
     )
     rv = test_client.post(uri, json={})
     assert rv.status_code == 422
-
-    assert "error" in rv.json
-    if virtual_dataset.database.db_engine_spec.engine_name == "PostgreSQL":
-        assert "INCORRECT SQL" in rv.json.get("error")
+    assert rv.json["errors"][0]["error_type"] == "INVALID_SQL_ERROR"
 
 
 @with_feature_flags(ALLOW_ADHOC_SUBQUERY=True)

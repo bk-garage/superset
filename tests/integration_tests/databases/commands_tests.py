@@ -421,7 +421,8 @@ class TestImportDatabasesCommand(SupersetTestCase):
         assert database.database_name == "imported_database"
         assert database.expose_in_sqllab
         assert database.extra == "{}"
-        assert database.sqlalchemy_uri == "postgresql://user:pass@host1"
+        assert database.sqlalchemy_uri == "postgresql://user:XXXXXXXXXX@host1"
+        assert database.password == "pass"  # noqa: S105
 
         db.session.delete(database)
         db.session.commit()
@@ -461,7 +462,8 @@ class TestImportDatabasesCommand(SupersetTestCase):
         assert database.database_name == "imported_database"
         assert database.expose_in_sqllab
         assert database.extra == '{"schemas_allowed_for_file_upload": ["upload"]}'
-        assert database.sqlalchemy_uri == "postgresql://user:pass@host1"
+        assert database.sqlalchemy_uri == "postgresql://user:XXXXXXXXXX@host1"
+        assert database.password == "pass"  # noqa: S105
 
         db.session.delete(database)
         db.session.commit()
@@ -732,7 +734,8 @@ class TestImportDatabasesCommand(SupersetTestCase):
         assert database.database_name == "imported_database"
         assert database.expose_in_sqllab
         assert database.extra == "{}"
-        assert database.sqlalchemy_uri == "postgresql://user:pass@host1"
+        assert database.sqlalchemy_uri == "postgresql://user:XXXXXXXXXX@host1"
+        assert database.password == "pass"  # noqa: S105
 
         model_ssh_tunnel = (
             db.session.query(SSHTunnel)
@@ -779,7 +782,8 @@ class TestImportDatabasesCommand(SupersetTestCase):
         assert database.database_name == "imported_database"
         assert database.expose_in_sqllab
         assert database.extra == "{}"
-        assert database.sqlalchemy_uri == "postgresql://user:pass@host1"
+        assert database.sqlalchemy_uri == "postgresql://user:XXXXXXXXXX@host1"
+        assert database.password == "pass"  # noqa: S105
 
         model_ssh_tunnel = (
             db.session.query(SSHTunnel)
@@ -887,7 +891,7 @@ class TestImportDatabasesCommand(SupersetTestCase):
 
 
 class TestTestConnectionDatabaseCommand(SupersetTestCase):
-    @patch("superset.daos.database.Database._get_sqla_engine")
+    @patch("superset.models.core.Database._get_sqla_engine")
     @patch("superset.commands.database.test_connection.event_logger.log_with_context")
     @patch("superset.utils.core.g")
     def test_connection_db_exception(
@@ -908,7 +912,7 @@ class TestTestConnectionDatabaseCommand(SupersetTestCase):
             )
         mock_event_logger.assert_called()
 
-    @patch("superset.daos.database.Database._get_sqla_engine")
+    @patch("superset.models.core.Database._get_sqla_engine")
     @patch("superset.commands.database.test_connection.event_logger.log_with_context")
     @patch("superset.utils.core.g")
     def test_connection_do_ping_exception(
@@ -931,7 +935,7 @@ class TestTestConnectionDatabaseCommand(SupersetTestCase):
             == SupersetErrorType.GENERIC_DB_ENGINE_ERROR
         )
 
-    @patch("superset.utils.core.timeout")
+    @patch("superset.commands.database.utils.timeout")
     @patch("superset.commands.database.test_connection.event_logger.log_with_context")
     @patch("superset.utils.core.g")
     def test_connection_do_ping_timeout(
@@ -957,7 +961,7 @@ class TestTestConnectionDatabaseCommand(SupersetTestCase):
             == SupersetErrorType.CONNECTION_DATABASE_TIMEOUT
         )
 
-    @patch("superset.daos.database.Database._get_sqla_engine")
+    @patch("superset.models.core.Database._get_sqla_engine")
     @patch("superset.commands.database.test_connection.event_logger.log_with_context")
     @patch("superset.utils.core.g")
     def test_connection_superset_security_connection(
@@ -980,7 +984,7 @@ class TestTestConnectionDatabaseCommand(SupersetTestCase):
 
         mock_event_logger.assert_called()
 
-    @patch("superset.daos.database.Database._get_sqla_engine")
+    @patch("superset.models.core.Database._get_sqla_engine")
     @patch("superset.commands.database.test_connection.event_logger.log_with_context")
     @patch("superset.utils.core.g")
     def test_connection_db_api_exc(
@@ -1008,7 +1012,12 @@ class TestTestConnectionDatabaseCommand(SupersetTestCase):
 @patch("superset.db_engine_specs.base.is_hostname_valid")
 @patch("superset.db_engine_specs.base.is_port_open")
 @patch("superset.commands.database.validate.DatabaseDAO")
-def test_validate(DatabaseDAO, is_port_open, is_hostname_valid, app_context):  # noqa: N803
+def test_validate(
+    mock_database_dao,  # noqa: N803
+    is_port_open,
+    is_hostname_valid,
+    app_context,
+) -> None:
     """
     Test parameter validation.
     """
