@@ -29,7 +29,7 @@ https://github.com/aws-samples/eks-blueprints-actions-workflow
 https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 
 
-## Deploying to OpenShift Local
+## Deploying to OpenShift Local
 
 Much faster than Rancher Desktop.
 
@@ -48,9 +48,9 @@ helm install -f values-custom.yaml -f values-secret.yaml superset superset/super
 helm uninstall superset -n superset
 ```
 
-Use RD's **Port Forwarding feature**. With the `kubectl port-forward` command the connection breaks.
+Use RD's **Port Forwarding feature** if the connection with the `kubectl port-forward` command breaks.
 
-The application was too slow. Connected to the database, but could not load the schema. OpenShift Local was much faster.
+Connected to the database, but could not load the schema. OpenShift Local was much faster.
 
 ### Delete the app
 ```zsh
@@ -65,3 +65,6 @@ Get database IP for setting up the connection:
 ```
 k describe po superset-postgresql-0 -n superset
 ```
+
+Change database setting (security - advanced) to allow uploading data from file.
+Select the "public" schema when importing from the CSV file.
